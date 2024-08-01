@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:name=".MyApp"
@@ -25,10 +27,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
-        <receiver android:name=".PhoneStateReceiver"
+<!--        <activity android:name=".AActivity"-->
+<!--            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />-->
+        <service android:name=".OverlayService" android:exported="true"/>
+        <receiver
+            android:name=".PhoneStateReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE"/>
