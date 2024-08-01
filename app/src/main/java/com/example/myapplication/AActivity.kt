@@ -1,53 +1,62 @@
 package com.example.myapplication
 
-import android.app.PictureInPictureParams
 import android.content.Intent
-import android.content.res.Configuration
-import android.os.Build
+import android.net.Uri
 import android.os.Bundle
-import android.util.Rational
-import androidx.appcompat.app.AppCompatActivity
+import android.provider.Settings
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 
 class AActivity : AppCompatActivity() {
+    private lateinit var windowManager: WindowManager
+    private lateinit var overlayView: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_a)
-        enterPipMode()
-        // "앱 열기" 버튼을 누르면 MainActivity 실행
-        findViewById<Button>(R.id.openAppButton).setOnClickListener {
+
+        // SYSTEM_ALERT_WINDOW 권한 체크 및 요청
+        if (!Settings.canDrawOverlays(this)) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            )
+            startActivityForResult(intent, 0)
+        }
+
+        // Inflate layout
+        val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        overlayView = inflater.inflate(R.layout.activity_a, null)
+
+        // WindowManager 설정
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FORMAT_CHANGED
+        )
+
+        // 위치와 크기 설정
+        params.gravity = Gravity.CENTER_VERTICAL or Gravity.CENTER_HORIZONTAL
+        params.x = 0
+        params.y = 100
+
+        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        windowManager.addView(overlayView, params)
+
+        // 버튼 설정
+        val openAppButton = overlayView.findViewById<Button>(R.id.openAppButton)
+        openAppButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             startActivity(intent)
+            windowManager.removeView(overlayView)
+            finish()
         }
-    }
-
-//    override fun onResume() {
-//        super.onResume()
-//        // PiP 모드 진입
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            enterPipMode()
-//        }
-//    }
-
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        // PiP 모드 진입
-        enterPipMode()
-    }
-
-    private fun enterPipMode() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val aspectRatio = Rational(9, 16) // 원하는 가로 세로 비율로 설정합니다.
-            val pipParams = PictureInPictureParams.Builder()
-                .setAspectRatio(aspectRatio)
-                .build()
-            enterPictureInPictureMode(pipParams)
-        }
-    }
-
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        // PiP 모드 상태 변화에 따른 UI 업데이트 등 작업
     }
 }
