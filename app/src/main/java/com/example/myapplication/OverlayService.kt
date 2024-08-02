@@ -31,6 +31,7 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        // 포그라운드 서비스 알림 설정
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
             val notification = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -41,26 +42,6 @@ class OverlayService : Service() {
             startForeground(NOTIFICATION_ID, notification)
         }
 
-//        // 포그라운드 서비스 알림 설정
-//        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-//        val channelId = CHANNEL_ID
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            val channel = NotificationChannel(
-//                channelId,
-//                "Overlay Service Channel",
-//                NotificationManager.IMPORTANCE_HIGH
-//            )
-//            notificationManager.createNotificationChannel(channel)
-//        }
-
-//        val notification = Notification.Builder(this, channelId)
-//            .setContentTitle("Overlay Service")
-//            .setContentText("Showing overlay")
-//            .setSmallIcon(R.drawable.ic_notification) // 여기에 실제 아이콘 리소스를 사용하세요.
-//            .build()
-//        Log.d("MyTag", "before startForeground")
-//        startForeground(NOTIFICATION_ID, notification)  // startForeground() 호출 시 ID는 1 이상이어야 합니다.
-//        Log.d("MyTag", "after startForeground")
 
         // SYSTEM_ALERT_WINDOW 권한 체크 및 요청
         if (!Settings.canDrawOverlays(this)) {
