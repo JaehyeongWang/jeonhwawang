@@ -4,7 +4,9 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -15,8 +17,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import androidx.core.app.NotificationCompat
 
 class OverlayService : Service() {
+    companion object {
+        const val NOTIFICATION_ID = 10
+        const val CHANNEL_ID = "overlay_service_channel"
+    }
 
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
@@ -24,26 +31,36 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        // 포그라운드 서비스 알림 설정
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "overlay_service_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Overlay Service Channel",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            notificationManager.createNotificationChannel(channel)
+            createNotificationChannel()
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("사랑On")
+                .setContentText("for jeonhwawang service")
+                .build()
+            Log.d("Test", "start foreground")
+            startForeground(NOTIFICATION_ID, notification)
         }
 
-        val notification = Notification.Builder(this, channelId)
-            .setContentTitle("Overlay Service")
-            .setContentText("Showing overlay")
-            .setSmallIcon(R.drawable.ic_notification) // 여기에 실제 아이콘 리소스를 사용하세요.
-            .build()
-        Log.d("MyTag", "before startForeground")
-        startForeground(1, notification)  // startForeground() 호출 시 ID는 1 이상이어야 합니다.
-        Log.d("MyTag", "after startForeground")
+//        // 포그라운드 서비스 알림 설정
+//        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+//        val channelId = CHANNEL_ID
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            val channel = NotificationChannel(
+//                channelId,
+//                "Overlay Service Channel",
+//                NotificationManager.IMPORTANCE_HIGH
+//            )
+//            notificationManager.createNotificationChannel(channel)
+//        }
+
+//        val notification = Notification.Builder(this, channelId)
+//            .setContentTitle("Overlay Service")
+//            .setContentText("Showing overlay")
+//            .setSmallIcon(R.drawable.ic_notification) // 여기에 실제 아이콘 리소스를 사용하세요.
+//            .build()
+//        Log.d("MyTag", "before startForeground")
+//        startForeground(NOTIFICATION_ID, notification)  // startForeground() 호출 시 ID는 1 이상이어야 합니다.
+//        Log.d("MyTag", "after startForeground")
 
         // SYSTEM_ALERT_WINDOW 권한 체크 및 요청
         if (!Settings.canDrawOverlays(this)) {
@@ -86,6 +103,23 @@ class OverlayService : Service() {
             stopForeground(true)
             stopSelf()
         }
+    }
+
+    private fun createNotificationChannel() {
+        val notificationChannel = NotificationChannel(
+            CHANNEL_ID,
+            "MyApp notification",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        notificationChannel.enableLights(true)
+        notificationChannel.lightColor = Color.RED
+        notificationChannel.enableVibration(true)
+        notificationChannel.description = "AppApp Tests"
+
+        val notificationManager = applicationContext.getSystemService(
+            Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(
+            notificationChannel)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
