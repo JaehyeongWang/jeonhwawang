@@ -42,17 +42,6 @@ class OverlayService : Service() {
             startForeground(NOTIFICATION_ID, notification)
         }
 
-
-        // SYSTEM_ALERT_WINDOW 권한 체크 및 요청
-        if (!Settings.canDrawOverlays(this)) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:$packageName")
-            )
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-        }
-
         // Inflate layout
         val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
         overlayView = inflater.inflate(R.layout.overlay_layout, null)
@@ -92,10 +81,6 @@ class OverlayService : Service() {
             "MyApp notification",
             NotificationManager.IMPORTANCE_HIGH
         )
-        notificationChannel.enableLights(true)
-        notificationChannel.lightColor = Color.RED
-        notificationChannel.enableVibration(true)
-        notificationChannel.description = "AppApp Tests"
 
         val notificationManager = applicationContext.getSystemService(
             Context.NOTIFICATION_SERVICE) as NotificationManager
