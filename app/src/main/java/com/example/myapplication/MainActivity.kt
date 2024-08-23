@@ -14,6 +14,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import android.Manifest
+import android.os.PowerManager
 
 class MainActivity : AppCompatActivity() {
     private val REQUEST_PERMISSIONS = 1
@@ -36,6 +37,8 @@ class MainActivity : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         }
+
+        requestIgnoreBatteryOptimizations(this)
 
 //        phoneStateReceiver = object : BroadcastReceiver() {
 //            override fun onReceive(context: Context, intent: Intent) {
@@ -66,6 +69,19 @@ class MainActivity : AppCompatActivity() {
         // 마시멜로 버전 이후
         if(denied > 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(permission.values.toTypedArray(), REQUEST_PERMISSIONS)
+        }
+    }
+
+    fun requestIgnoreBatteryOptimizations(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            val packageName = context.packageName
+
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                intent.data = Uri.parse("package:$packageName")
+                context.startActivity(intent)
+            }
         }
     }
 
