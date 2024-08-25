@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
@@ -18,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 
 class OverlayService : Service() {
@@ -32,38 +34,23 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        if (!hasOverlayPermission()) {
-            requestOverlayPermission()
-            stopSelf()
-            return
-        }
 
         startForegroundService()
-
-
-        Handler(Looper.getMainLooper()).postDelayed({
+        if (Settings.canDrawOverlays(this)) {
             showOverlay()
-        }, 1000) // 500ms 딜레이
-    }
-
-    private fun hasOverlayPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Settings.canDrawOverlays(this)
         } else {
-            true
-        }
-    }
-
-    private fun requestOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // 권한이 없을 때 사용자에게 알림 및 설정 화면으로 이동
+            Toast.makeText(this, "오버레이 권한이 필요합니다.", Toast.LENGTH_LONG).show()
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:$packageName")
             )
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
+            stopSelf() // 서비스 종료
         }
     }
+
 
     private fun startForegroundService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -73,8 +60,7 @@ class OverlayService : Service() {
                 .setContentText("for jeonhwawang service")
                 .setSmallIcon(R.drawable.ic_notification) // 적절한 아이콘 추가
                 .build()
-            startForeground(NOTIFICATION_ID, notification)
-
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
         }
     }
 
@@ -83,7 +69,7 @@ class OverlayService : Service() {
             val notificationChannel = NotificationChannel(
                 CHANNEL_ID,
                 "Overlay Service Channel",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_HIGH
             )
 
             val notificationManager = getSystemService(

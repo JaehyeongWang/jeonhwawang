@@ -14,7 +14,10 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.PowerManager
+import com.example.myapplication.OverlayService.Companion.CHANNEL_ID
 
 class MainActivity : AppCompatActivity() {
     private val REQUEST_PERMISSIONS = 1
@@ -39,6 +42,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         requestIgnoreBatteryOptimizations(this)
+
+//        createNotificationChannel()
+
 
 //        phoneStateReceiver = object : BroadcastReceiver() {
 //            override fun onReceive(context: Context, intent: Intent) {
@@ -84,6 +90,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+//    private fun createNotificationChannel() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            val notificationChannel = NotificationChannel(
+//                CHANNEL_ID,
+//                "Overlay Service Channel",
+//                NotificationManager.IMPORTANCE_HIGH
+//            )
+//
+//            val notificationManager = getSystemService(
+//                Context.NOTIFICATION_SERVICE
+//            ) as NotificationManager
+//            notificationManager.createNotificationChannel(notificationChannel)
+//        }
+//    }
 
 //    override fun onDestroy() {
 //        super.onDestroy()
